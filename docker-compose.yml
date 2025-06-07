@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: dvd_rental_db
+    environment:
+      POSTGRES_DB: dvd_rental
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    command: postgres -c 'max_connections=1000'
+
+volumes:
+  postgres_data:
