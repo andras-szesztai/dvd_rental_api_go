@@ -1,2 +1,0 @@
-ALTER TABLE staff ALTER COLUMN address_id SET NOT NULL;
-ALTER TABLE customer ALTER COLUMN address_id SET NOT NULL;

@@ -43,14 +43,19 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		user, err := app.store.Users.GetAdminUserByID(r.Context(), userId)
+		user, err := app.store.Users.GetUserByID(r.Context(), userId)
 		if err != nil {
 			app.unauthorized(w, r, fmt.Errorf("invalid token"))
 			return
 		}
 
-		// Here we will check customers also
-		user.Role = "admin"
+		role, err := app.store.Roles.GetRoleByID(r.Context(), int64(user.Role.ID))
+		if err != nil {
+			app.unauthorized(w, r, fmt.Errorf("invalid token"))
+			return
+		}
+
+		user.Role = role
 
 		ctx := context.WithValue(r.Context(), contextKey("user"), user)
 		next.ServeHTTP(w, r.WithContext(ctx))

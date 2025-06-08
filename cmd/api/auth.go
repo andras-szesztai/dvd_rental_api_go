@@ -1,34 +1,23 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/andras-szesztai/dev-rental-api/internal/store"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type RegisterAdminUserPayload struct {
-	Username  string `json:"username" validate:"required,min=3,max=20"`
-	FirstName string `json:"first_name" validate:"required,min=3,max=20"`
-	LastName  string `json:"last_name" validate:"required,min=3,max=20"`
-	Email     string `json:"email" validate:"required,email"`
-	Password  string `json:"password" validate:"required,min=8,max=72"`
-	StoreID   int    `json:"store_id" validate:"required,min=1"`
+type RegisterUserPayload struct {
+	Email    string `json:"email" validate:"required,email"`
+	Username string `json:"username" validate:"required,min=3,max=20"`
+	Password string `json:"password" validate:"required,min=8,max=72"`
 }
 
-// Only authenticated Admins should be able to create
-func (app *application) registerAdminUser(w http.ResponseWriter, r *http.Request) {
-	currentUser := app.getUserContext(r)
-
-	if currentUser.Role != "admin" {
-		app.unauthorized(w, r, fmt.Errorf("unauthorized"))
-		return
-	}
-
-	var payload RegisterAdminUserPayload
+func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
+	var payload RegisterUserPayload
 
 	err := readJSON(w, r, &payload)
 	if err != nil {
@@ -42,39 +31,64 @@ func (app *application) registerAdminUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	storeID, err := strconv.ParseInt(strconv.Itoa(payload.StoreID), 10, 64)
+	staff, err := app.store.Staff.GetStaffByEmail(r.Context(), payload.Email)
+	if err != nil && err != sql.ErrNoRows {
+		app.badRequest(w, r, fmt.Errorf("failed to get staff member: %w", err))
+		return
+	}
+
+	if staff != nil && staff.UserID != nil {
+		app.badRequest(w, r, fmt.Errorf("staff member already registered"))
+		return
+	}
+
+	var roleName string
+	if staff != nil && staff.ID > 0 {
+		roleName = "admin"
+	}
+
+	if err == sql.ErrNoRows {
+		customer, err := app.store.Customers.GetCustomerByEmail(r.Context(), payload.Email)
+		if err != nil {
+			app.badRequest(w, r, fmt.Errorf("failed to get customer: %w", err))
+			return
+		}
+
+		if customer.UserID != nil {
+			app.badRequest(w, r, fmt.Errorf("customer already registered"))
+			return
+		}
+
+		roleName = "customer"
+	}
+
+	role, err := app.store.Roles.GetRoleByName(r.Context(), roleName)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
 	}
 
-	rentalPlace, err := app.store.RentalPlaces.GetRentalPlaceByID(r.Context(), storeID)
-	if err != nil {
-		app.badRequest(w, r, fmt.Errorf("failed to get rental place: %w", err))
-		return
+	user := &store.User{
+		Email:    payload.Email,
+		Username: payload.Username,
+		Role:     role,
 	}
 
-	newUser := store.User{
-		AddressID: rentalPlace.ID,
-		Username:  payload.Username,
-		FirstName: payload.FirstName,
-		LastName:  payload.LastName,
-		Email:     payload.Email,
-		StoreID:   payload.StoreID,
-	}
-
-	if err := newUser.Password.Set(payload.Password); err != nil {
+	if err := user.Password.Set(payload.Password); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
 
-	err = app.store.Users.CreateAdminUser(r.Context(), &newUser)
+	err = app.store.Users.RegisterUser(r.Context(), user)
 	if err != nil {
-		app.internalServerError(w, r, err)
+		app.badRequest(w, r, err)
 		return
 	}
 
-	app.jsonResponse(w, http.StatusCreated, nil)
+	if err := app.jsonResponse(w, http.StatusCreated, nil); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
 }
 
 type SignInPayload struct {
@@ -82,7 +96,7 @@ type SignInPayload struct {
 	Password string `json:"password" validate:"required,min=8,max=72"`
 }
 
-func (app *application) signInAdminUser(w http.ResponseWriter, r *http.Request) {
+func (app *application) signInUser(w http.ResponseWriter, r *http.Request) {
 	var payload SignInPayload
 
 	err := readJSON(w, r, &payload)
@@ -97,7 +111,29 @@ func (app *application) signInAdminUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user, err := app.store.Users.GetAdminUserByEmail(r.Context(), payload.Email)
+	var userID int
+	customer, err := app.store.Customers.GetCustomerByEmail(r.Context(), payload.Email)
+	if err != nil && err != sql.ErrNoRows {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	if customer == nil {
+		staff, err := app.store.Staff.GetStaffByEmail(r.Context(), payload.Email)
+		fmt.Println("staff error", staff)
+		if err != nil {
+			app.badRequest(w, r, err)
+			return
+		}
+		if staff.UserID != nil {
+			userID = *staff.UserID
+		}
+	} else {
+		userID = *customer.UserID
+	}
+
+	fmt.Println("customer error", userID)
+	user, err := app.store.Users.GetUserByID(r.Context(), int64(userID))
 	if err != nil {
 		app.badRequest(w, r, err)
 		return

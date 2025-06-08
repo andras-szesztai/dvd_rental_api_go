@@ -1,0 +1,6 @@
+ALTER TABLE staff DROP COLUMN user_id;
+ALTER TABLE customer DROP COLUMN user_id;
+
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_id_fkey;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS users;

@@ -23,20 +23,18 @@ func (app *application) mountRoutes() http.Handler {
 		r.Get("/health", app.healthCheckHandler)
 
 		r.Route("/auth", func(r chi.Router) {
-			r.Route("/admin", func(r chi.Router) {
-				r.Group(func(r chi.Router) {
-					r.Use(app.AuthTokenMiddleware)
-					r.Post("/register", app.registerAdminUser)
-				})
-				r.Post("/sign-in", app.signInAdminUser)
-			})
+			r.Post("/register", app.registerUser)
+			r.Post("/sign-in", app.signInUser)
 		})
-
-		r.Route("/rentals", func(r chi.Router) {
-			r.Route("/{id}", func(r chi.Router) {
-				r.Use(app.AuthTokenMiddleware)
-				r.Get("/", app.getRentalByID)
+		// Auth routes
+		r.Group(func(r chi.Router) {
+			r.Use(app.AuthTokenMiddleware)
+			r.Route("/rentals", func(r chi.Router) {
+				r.Route("/{id}", func(r chi.Router) {
+					r.Get("/", app.getRentalByID)
+				})
 			})
+
 		})
 	})
 

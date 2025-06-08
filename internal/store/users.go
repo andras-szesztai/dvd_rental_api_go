@@ -17,50 +17,63 @@ func NewUserStore(db *sql.DB) *UserStore {
 }
 
 type User struct {
-	ID         int            `json:"id"`
-	AddressID  int            `json:"address_id"`
-	StoreID    int            `json:"store_id"`
-	Role       string         `json:"role"`
-	FirstName  string         `json:"first_name"`
-	LastName   string         `json:"last_name"`
-	Email      string         `json:"email"`
-	Username   string         `json:"username"`
-	Password   utils.Password `json:"-"`
-	LastUpdate time.Time      `json:"last_update"`
+	ID       int            `json:"id"`
+	Email    string         `json:"email"`
+	Username string         `json:"username"`
+	Role     *Role          `json:"role"`
+	Password utils.Password `json:"-"`
 }
 
-func (s *UserStore) CreateAdminUser(ctx context.Context, user *User) error {
-	query := `
-		INSERT INTO staff (store_id, first_name, last_name, email, username, password)
-		VALUES ($1, $2, $3, $4, $5, $6)
-	`
+func (s *UserStore) RegisterUser(ctx context.Context, user *User) error {
+	return withTx(s.db, ctx, func(tx *sql.Tx) error {
+		query := `
+			INSERT INTO users (username, role_id, password)
+			VALUES ($1, $2, $3)
+			RETURNING id
+		`
 
-	_, err := s.db.ExecContext(ctx, query, user.StoreID, user.FirstName, user.LastName, user.Email, user.Username, user.Password.Hash)
-	if err != nil {
-		switch err.Error() {
-		case "pq: duplicate key value violates unique constraint \"staff_email_key\"":
-			return ErrEmailAlreadyExists
-		case "pq: duplicate key value violates unique constraint \"staff_username_key\"":
-			return ErrUsernameAlreadyExists
-		default:
+		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		defer cancel()
+
+		var userID int
+		err := tx.QueryRowContext(ctx, query, user.Username, user.Role.ID, user.Password.Hash).Scan(&userID)
+		if err != nil {
 			return err
 		}
-	}
 
-	return nil
+		user.ID = userID
+
+		var updateQuery string
+		if user.Role.Name == "admin" {
+			updateQuery = `
+				UPDATE staff SET user_id = $1 WHERE email = $2
+			`
+		} else {
+			updateQuery = `
+				UPDATE customer SET user_id = $1 WHERE email = $2
+			`
+		}
+
+		_, err = tx.ExecContext(ctx, updateQuery, userID, user.Email)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
 
-func (s *UserStore) GetAdminUserByEmail(ctx context.Context, email string) (*User, error) {
+func (s *UserStore) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	query := `
-		SELECT staff_id, store_id, first_name, last_name, email, username, password, last_update
-		FROM staff
+		SELECT id, username, role_id, password
+		FROM users
 		WHERE email = $1
 	`
 
 	row := s.db.QueryRowContext(ctx, query, email)
 
 	var user User
-	err := row.Scan(&user.ID, &user.StoreID, &user.FirstName, &user.LastName, &user.Email, &user.Username, &user.Password.Hash, &user.LastUpdate)
+	err := row.Scan(&user.ID, &user.Username, &user.Role.ID, &user.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -68,17 +81,18 @@ func (s *UserStore) GetAdminUserByEmail(ctx context.Context, email string) (*Use
 	return &user, nil
 }
 
-func (s *UserStore) GetAdminUserByID(ctx context.Context, id int64) (*User, error) {
+func (s *UserStore) GetUserByID(ctx context.Context, id int64) (*User, error) {
 	query := `
-		SELECT staff_id, store_id, first_name, last_name, email, username, password, last_update
-		FROM staff
-		WHERE staff_id = $1
+		SELECT id, username, role_id, password
+		FROM users
+		WHERE id = $1
 	`
 
 	row := s.db.QueryRowContext(ctx, query, id)
 
 	var user User
-	err := row.Scan(&user.ID, &user.StoreID, &user.FirstName, &user.LastName, &user.Email, &user.Username, &user.Password.Hash, &user.LastUpdate)
+	user.Role = &Role{}
+	err := row.Scan(&user.ID, &user.Username, &user.Role.ID, &user.Password.Hash)
 	if err != nil {
 		return nil, err
 	}
