@@ -18,18 +18,25 @@ func (app *application) mountRoutes() http.Handler {
 	router.Use(middleware.StripSlashes)
 
 	router.Route("/v1", func(r chi.Router) {
-		r.Get("/rentals/{id}", app.getRentalByID)
+		r.Get("/health", app.healthCheckHandler)
+
+		r.Route("/users", func(r chi.Router) {
+			r.Route("/admin", func(r chi.Router) {
+				r.Post("/register", app.registerAdminUser)
+			})
+		})
+
+		r.Route("/rentals", func(r chi.Router) {
+			r.Route("/{id}", func(r chi.Router) {
+				r.Get("/", app.getRentalByID)
+			})
+		})
 	})
 
 	return router
 }
 
 func (app *application) serve(router http.Handler) error {
-	// Docs
-	// docs.SwaggerInfo.Version = version
-	// docs.SwaggerInfo.Host = app.config.apiURL
-	// docs.SwaggerInfo.BasePath = "/v1"
-
 	srv := &http.Server{
 		Addr:         app.config.addr,
 		Handler:      router,

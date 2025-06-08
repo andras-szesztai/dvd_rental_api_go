@@ -11,6 +11,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// 1. Setup swagger
+// 2. Setup POST rental (check inventory)
+// 4. Setup PATCH rental for return
+// 5. Setup AUTH (JWT)
+// 6. Setup Authorization
+
 const version = "0.0.1"
 
 type application struct {
