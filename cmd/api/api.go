@@ -8,6 +8,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
+type contextKey string
+
 func (app *application) mountRoutes() http.Handler {
 	router := chi.NewRouter()
 
@@ -20,14 +22,19 @@ func (app *application) mountRoutes() http.Handler {
 	router.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
 
-		r.Route("/users", func(r chi.Router) {
+		r.Route("/auth", func(r chi.Router) {
 			r.Route("/admin", func(r chi.Router) {
-				r.Post("/register", app.registerAdminUser)
+				r.Group(func(r chi.Router) {
+					r.Use(app.AuthTokenMiddleware)
+					r.Post("/register", app.registerAdminUser)
+				})
+				r.Post("/sign-in", app.signInAdminUser)
 			})
 		})
 
 		r.Route("/rentals", func(r chi.Router) {
 			r.Route("/{id}", func(r chi.Router) {
+				r.Use(app.AuthTokenMiddleware)
 				r.Get("/", app.getRentalByID)
 			})
 		})

@@ -11,13 +11,13 @@ import (
 func (app *application) getRentalByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
-	rentalID, err := strconv.Atoi(id)
+	rentalID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
 	}
 
-	rental, err := app.store.Rental.GetRental(r.Context(), rentalID)
+	rental, err := app.store.Rentals.GetRental(r.Context(), rentalID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			app.notFound(w, r)

@@ -17,7 +17,7 @@ type Rental struct {
 	ID int `json:"id"`
 }
 
-func (s *RentalStore) GetRental(ctx context.Context, id int) (*Rental, error) {
+func (s *RentalStore) GetRental(ctx context.Context, id int64) (*Rental, error) {
 	query := `
 		SELECT rental_id
 		FROM rental

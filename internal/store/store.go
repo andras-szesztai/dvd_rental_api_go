@@ -12,21 +12,23 @@ var (
 )
 
 type Store struct {
-	Rental interface {
-		GetRental(ctx context.Context, id int) (*Rental, error)
+	Rentals interface {
+		GetRental(ctx context.Context, id int64) (*Rental, error)
 	}
-	User interface {
-		CreateAdminUser(ctx context.Context, user *AdminUser) error
+	Users interface {
+		CreateAdminUser(ctx context.Context, user *User) error
+		GetAdminUserByEmail(ctx context.Context, email string) (*User, error)
+		GetAdminUserByID(ctx context.Context, id int64) (*User, error)
 	}
-	RentalPlace interface {
-		GetRentalPlaceByID(ctx context.Context, id int) (*RentalPlace, error)
+	RentalPlaces interface {
+		GetRentalPlaceByID(ctx context.Context, id int64) (*RentalPlace, error)
 	}
 }
 
 func NewStore(db *sql.DB) *Store {
 	return &Store{
-		Rental:      NewRentalStore(db),
-		User:        NewUserStore(db),
-		RentalPlace: NewRentalPlaceStore(db),
+		Rentals:      NewRentalStore(db),
+		Users:        NewUserStore(db),
+		RentalPlaces: NewRentalPlaceStore(db),
 	}
 }
