@@ -16,5 +16,6 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE staff ADD COLUMN user_id SERIAL REFERENCES users(id);
-ALTER TABLE customer ADD COLUMN user_id SERIAL REFERENCES users(id);
+-- Add nullable foreign key columns
+ALTER TABLE staff ADD COLUMN user_id INTEGER REFERENCES users(id);
+ALTER TABLE customer ADD COLUMN user_id INTEGER REFERENCES users(id);

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/andras-szesztai/dev-rental-api/internal/store"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -59,5 +60,16 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), contextKey("user"), user)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (app *application) CheckAdminMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(contextKey("user")).(*store.User)
+		if user.Role.Name != "admin" {
+			app.unauthorized(w, r, fmt.Errorf("unauthorized"))
+			return
+		}
+		next.ServeHTTP(w, r)
 	})
 }

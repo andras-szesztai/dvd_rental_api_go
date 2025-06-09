@@ -13,7 +13,7 @@ import (
 //
 //	@Summary		Get rental by ID
 //	@Description	Get a rental by ID
-//	@Tags			3. Rentals
+//	@Tags			4. Rentals
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"Rental ID"

@@ -21,6 +21,7 @@ type Store struct {
 		GetStaffByEmail(ctx context.Context, email string) (*Staff, error)
 	}
 	Customers interface {
+		CreateCustomer(ctx context.Context, customer *Customer) error
 		GetCustomerByEmail(ctx context.Context, email string) (*Customer, error)
 	}
 	Roles interface {

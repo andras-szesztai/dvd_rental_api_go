@@ -41,7 +41,7 @@ func (app *application) mountRoutes() http.Handler {
 			r.Post("/register", app.registerUser)
 			r.Post("/sign-in", app.signInUser)
 		})
-		// Auth routes
+
 		r.Group(func(r chi.Router) {
 			r.Use(app.AuthTokenMiddleware)
 			r.Route("/rentals", func(r chi.Router) {
@@ -49,7 +49,9 @@ func (app *application) mountRoutes() http.Handler {
 					r.Get("/", app.getRentalByID)
 				})
 			})
-
+			r.Route("/customers", func(r chi.Router) {
+				r.Post("/", app.CheckAdminMiddleware(app.createCustomer))
+			})
 		})
 	})
 
