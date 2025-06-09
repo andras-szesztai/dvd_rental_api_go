@@ -8,10 +8,17 @@ import (
 	"github.com/andras-szesztai/dev-rental-api/docs"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-playground/validator/v10"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 type contextKey string
+
+var Validator *validator.Validate
+
+func init() {
+	Validator = validator.New(validator.WithRequiredStructEnabled())
+}
 
 func (app *application) mountRoutes() http.Handler {
 	router := chi.NewRouter()

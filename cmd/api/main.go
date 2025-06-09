@@ -11,6 +11,7 @@ import (
 	"github.com/andras-szesztai/dev-rental-api/internal/auth"
 	"github.com/andras-szesztai/dev-rental-api/internal/db"
 	"github.com/andras-szesztai/dev-rental-api/internal/store"
+	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 	"github.com/joho/godotenv"
 )
 
@@ -43,6 +44,7 @@ type application struct {
 	config        config
 	store         *store.Store
 	authenticator auth.Authenticator
+	errorHandler  *utils.ErrorHandler
 }
 
 type config struct {
@@ -140,11 +142,14 @@ func main() {
 
 	authenticator := auth.NewJWTAuthenticator(cfg.auth.token.secret, cfg.auth.token.aud, cfg.auth.token.iss)
 
+	errorHandler := utils.NewErrorHandler(logger)
+
 	app := &application{
 		logger:        logger,
 		config:        cfg,
 		store:         store,
 		authenticator: authenticator,
+		errorHandler:  errorHandler,
 	}
 
 	err = app.serve(app.mountRoutes())

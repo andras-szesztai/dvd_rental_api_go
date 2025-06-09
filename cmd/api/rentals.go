@@ -6,8 +6,14 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/andras-szesztai/dev-rental-api/internal/store"
+	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 	"github.com/go-chi/chi/v5"
 )
+
+type rentalResponse struct {
+	Data store.Rental `json:"data"`
+}
 
 // GetRentalByID godoc
 //
@@ -29,25 +35,25 @@ func (app *application) getRentalByID(w http.ResponseWriter, r *http.Request) {
 	user := app.getUserContext(r)
 
 	if user == nil || user.Role.Name != "admin" {
-		app.unauthorized(w, r, errors.New("unauthorized"))
+		app.errorHandler.Unauthorized(w, r, errors.New("unauthorized"))
 		return
 	}
 
 	rentalID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		app.badRequest(w, r, err)
+		app.errorHandler.BadRequest(w, r, err)
 		return
 	}
 
 	rental, err := app.store.Rentals.GetRental(r.Context(), rentalID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			app.notFound(w, r)
+			app.errorHandler.NotFound(w, r)
 			return
 		}
-		app.internalServerError(w, r, err)
+		app.errorHandler.InternalServerError(w, r, err)
 		return
 	}
 
-	app.jsonResponse(w, http.StatusOK, rentalResponse{Data: *rental})
+	utils.WriteJSONResponse(w, http.StatusOK, rentalResponse{Data: *rental})
 }

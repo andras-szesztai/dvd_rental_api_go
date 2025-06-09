@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/andras-szesztai/dev-rental-api/internal/store"
+	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 )
 
 type createCustomerPayload struct {
@@ -29,15 +30,15 @@ type createCustomerPayload struct {
 func (app *application) createCustomer(w http.ResponseWriter, r *http.Request) {
 	var payload createCustomerPayload
 
-	err := readJSON(w, r, &payload)
+	err := utils.ReadJSON(w, r, &payload)
 	if err != nil {
-		app.badRequest(w, r, err)
+		app.errorHandler.BadRequest(w, r, err)
 		return
 	}
 
 	err = Validator.Struct(payload)
 	if err != nil {
-		app.badRequest(w, r, err)
+		app.errorHandler.BadRequest(w, r, err)
 		return
 	}
 
@@ -50,9 +51,9 @@ func (app *application) createCustomer(w http.ResponseWriter, r *http.Request) {
 
 	err = app.store.Customers.CreateCustomer(r.Context(), customer)
 	if err != nil {
-		app.internalServerError(w, r, err)
+		app.errorHandler.InternalServerError(w, r, err)
 		return
 	}
 
-	app.jsonResponse(w, http.StatusCreated, nil)
+	utils.WriteJSONResponse(w, http.StatusCreated, nil)
 }
