@@ -11,11 +11,23 @@ import (
 )
 
 type RegisterUserPayload struct {
-	Email    string `json:"email" validate:"required,email"`
-	Username string `json:"username" validate:"required,min=3,max=20"`
-	Password string `json:"password" validate:"required,min=8,max=72"`
+	Email    string `json:"email" validate:"required,email" example:"john.doe@example.com"`
+	Username string `json:"username" validate:"required,min=3,max=20" example:"john.doe"`
+	Password string `json:"password" validate:"required,min=8,max=72" example:"password123"`
 }
 
+// RegisterUser godoc
+//
+//	@Summary		Register user
+//	@Description	Register a new user
+//	@Tags			2. Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		RegisterUserPayload	true	"Register user request"
+//	@Success		201		{object}	nil
+//	@Failure		400		{object}	errorResponse
+//	@Failure		500		{object}	errorResponse
+//	@Router			/auth/register [post]
 func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
 	var payload RegisterUserPayload
 
@@ -92,10 +104,22 @@ func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
 }
 
 type SignInPayload struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8,max=72"`
+	Email    string `json:"email" validate:"required,email" example:"john.doe@example.com"`
+	Password string `json:"password" validate:"required,min=8,max=72" example:"password123"`
 }
 
+// SignInUser godoc
+//
+//	@Summary		Sign in user
+//	@Description	Sign in a user
+//	@Tags			2. Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		SignInPayload	true	"Sign in user request"
+//	@Success		200		{object}	signInResponse	"JWT token"
+//	@Failure		400		{object}	errorResponse
+//	@Failure		500		{object}	errorResponse
+//	@Router			/auth/sign-in [post]
 func (app *application) signInUser(w http.ResponseWriter, r *http.Request) {
 	var payload SignInPayload
 
@@ -159,7 +183,7 @@ func (app *application) signInUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := app.jsonResponse(w, http.StatusOK, token); err != nil {
+	if err := app.jsonResponse(w, http.StatusOK, signInResponse{Data: token}); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}

@@ -12,3 +12,7 @@ migrate-up:
 .PHONY: migrate-down
 migrate-down:
 	@migrate -path $(MIGRATIONS_PATH) -database $(DB_ADDR) down
+
+.PHONY: swagger
+swagger:
+	@swag init -g ./main.go -d ./cmd/api,./internal/store,./internal/utils -o ./docs && swag fmt

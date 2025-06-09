@@ -1,4 +1,6 @@
 postgres-certs/
 bin/
+docs/
 
 .env
+

@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 
 	"github.com/andras-szesztai/dev-rental-api/internal/auth"
@@ -15,6 +16,28 @@ import (
 
 const version = "0.0.1"
 
+//	@title			DVD Rental API
+//	@version		0.0.1
+//	@description	API for a DVD Rental management application
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		localhost:8080
+//	@BasePath	/v1
+
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@description				Type "Bearer" followed by a space and JWT token.
+//	@scheme						bearer
+//	@type						http
+
 type application struct {
 	logger        *zap.SugaredLogger
 	config        config
@@ -23,10 +46,11 @@ type application struct {
 }
 
 type config struct {
-	addr string
-	env  string
-	db   dbConfig
-	auth authConfig
+	addr   string
+	env    string
+	db     dbConfig
+	auth   authConfig
+	apiURL string
 }
 
 type dbConfig struct {
@@ -47,6 +71,30 @@ type tokenConfig struct {
 	iss    string
 }
 
+//	@title			Swagger Examasdasdasdasdasdawdasple API
+//	@version		1.0
+//	@description	This is a sample server celler server.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
+
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@description				Type "Bearer" followed by a space and JWT token.
+//	@scheme						bearer
+//	@type						http
+
+// @externalDocs.description	OpenAPI
+// @externalDocs.url			https://swagger.io/resources/open-api/
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -75,6 +123,7 @@ func main() {
 				iss:    os.Getenv("TOKEN_ISS"),
 			},
 		},
+		apiURL: os.Getenv("API_URL"),
 	}
 
 	logger := zap.Must(zap.NewProduction()).Sugar()

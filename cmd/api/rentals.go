@@ -9,6 +9,21 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// GetRentalByID godoc
+//
+//	@Summary		Get rental by ID
+//	@Description	Get a rental by ID
+//	@Tags			3. Rentals
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Rental ID"
+//	@Success		200	{object}	rentalResponse
+//	@Failure		400	{object}	errorResponse
+//	@Failure		401	{object}	errorResponse
+//	@Failure		404	{object}	errorResponse
+//	@Failure		500	{object}	errorResponse
+//	@Security		ApiKeyAuth
+//	@Router			/rentals/{id} [get]
 func (app *application) getRentalByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	user := app.getUserContext(r)

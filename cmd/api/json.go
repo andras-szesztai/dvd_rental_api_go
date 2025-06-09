@@ -42,6 +42,14 @@ func (app *application) jsonResponse(w http.ResponseWriter, status int, data any
 	return writeJSONResponse(w, status, data)
 }
 
+type healthCheckResponse struct {
+	Data healthCheckData `json:"data"`
+}
+
+type signInResponse struct {
+	Data string `json:"data"`
+}
+
 type rentalResponse struct {
 	Data store.Rental `json:"data"`
 }

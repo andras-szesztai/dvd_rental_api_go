@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/andras-szesztai/dev-rental-api/docs"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 type contextKey string
@@ -21,6 +24,18 @@ func (app *application) mountRoutes() http.Handler {
 
 	router.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
+
+		docsURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
+		r.Get("/swagger/*", httpSwagger.Handler(
+			httpSwagger.URL(docsURL),
+			httpSwagger.DeepLinking(true),
+			httpSwagger.DocExpansion("list"),
+			httpSwagger.DomID("swagger-ui"),
+			httpSwagger.UIConfig(map[string]string{
+				"tagsSorter":       "\"alpha\"",
+				"operationsSorter": "\"method\"",
+			}),
+		))
 
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", app.registerUser)
@@ -42,6 +57,12 @@ func (app *application) mountRoutes() http.Handler {
 }
 
 func (app *application) serve(router http.Handler) error {
+	docs.SwaggerInfo.Version = version
+	docs.SwaggerInfo.Host = app.config.apiURL
+	docs.SwaggerInfo.BasePath = "/v1"
+	docs.SwaggerInfo.Title = "DVD Rental API"
+	docs.SwaggerInfo.Description = "API for a DVD Rental management application"
+
 	srv := &http.Server{
 		Addr:         app.config.addr,
 		Handler:      router,
