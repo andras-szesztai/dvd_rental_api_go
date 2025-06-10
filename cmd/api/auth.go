@@ -47,18 +47,16 @@ func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var roleName string
 	staff, err := app.store.Staff.GetStaffByEmail(r.Context(), payload.Email)
 	if err != nil && err != sql.ErrNoRows {
-		app.errorHandler.BadRequest(w, r, fmt.Errorf("failed to get staff member: %w", err))
+		app.errorHandler.BadRequest(w, r, fmt.Errorf("f	: %w", err))
 		return
 	}
-
 	if staff != nil && staff.UserID != nil {
 		app.errorHandler.BadRequest(w, r, fmt.Errorf("staff member already registered"))
 		return
 	}
-
-	var roleName string
 	if staff != nil && staff.ID > 0 {
 		roleName = "admin"
 	}
@@ -69,12 +67,10 @@ func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
 			app.errorHandler.BadRequest(w, r, fmt.Errorf("failed to get customer: %w", err))
 			return
 		}
-
 		if customer.UserID != nil {
 			app.errorHandler.BadRequest(w, r, fmt.Errorf("customer already registered"))
 			return
 		}
-
 		roleName = "customer"
 	}
 
