@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/andras-szesztai/dev-rental-api/internal/testhelpers"
+	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
 )
 
 type RentalsTestSuite struct {
 	suite.Suite
-	pgContainer *testhelpers.PostgresContainer
+	pgContainer *utils.PostgresContainer
 	repository  *RentalStore
 	ctx         context.Context
 }
@@ -19,7 +19,7 @@ type RentalsTestSuite struct {
 func (suite *RentalsTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
-	pgContainer, err := testhelpers.CreatePostgresContainer()
+	pgContainer, err := utils.CreatePostgresContainer()
 	if err != nil {
 		suite.T().Fatal(err)
 	}

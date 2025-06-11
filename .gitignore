@@ -1,7 +1,6 @@
 postgres-certs/
 bin/
 docs/
-testdata/
 
 .env
 

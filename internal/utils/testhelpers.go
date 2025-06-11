@@ -1,4 +1,4 @@
-package testhelpers
+package utils
 
 import (
 	"context"
@@ -76,6 +76,21 @@ func CreatePostgresContainer() (*PostgresContainer, error) {
 		}
 	}
 
+	// Create container files from the temporary directory
+	var containerFiles []testcontainers.ContainerFile
+	files, err := os.ReadDir(tempDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		containerFiles = append(containerFiles, testcontainers.ContainerFile{
+			HostFilePath:      filepath.Join(tempDir, file.Name()),
+			ContainerFilePath: filepath.Join("/docker-entrypoint-initdb.d", file.Name()),
+			FileMode:          0644,
+		})
+	}
+
 	pgContainer, err := postgres.Run(ctx,
 		"postgres:16.1-alpine",
 		postgres.WithDatabase("dvdrental"),
@@ -84,11 +99,7 @@ func CreatePostgresContainer() (*PostgresContainer, error) {
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).WithStartupTimeout(10*time.Second)),
-		testcontainers.WithMounts(testcontainers.ContainerMount{
-			Source:   testcontainers.GenericBindMountSource{HostPath: tempDir},
-			Target:   "/docker-entrypoint-initdb.d",
-			ReadOnly: true,
-		}),
+		testcontainers.WithFiles(containerFiles...),
 	)
 
 	if err != nil {
