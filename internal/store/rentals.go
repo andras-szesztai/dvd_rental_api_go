@@ -25,6 +25,10 @@ func (s *RentalStore) GetRental(ctx context.Context, id int64) (*Rental, error) 
 		FROM rental
 		WHERE rental_id = $1
 	`
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
 	row := s.db.QueryRowContext(ctx, query, id)
 
 	var rental Rental

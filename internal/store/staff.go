@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 type StaffStore struct {
@@ -24,6 +25,9 @@ func (s *StaffStore) GetStaffByEmail(ctx context.Context, email string) (*Staff,
 		FROM staff
 		WHERE email = $1
 	`
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
 
 	row := s.db.QueryRowContext(ctx, query, email)
 

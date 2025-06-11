@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"testing"
 
 	"github.com/andras-szesztai/dev-rental-api/internal/utils"
@@ -39,16 +41,24 @@ func (suite *RentalsTestSuite) TearDownSuite() {
 }
 
 func (suite *RentalsTestSuite) TestGetRental() {
-	rental, err := suite.repository.GetRental(suite.ctx, 1)
+	suite.T().Run("it should return an existing rental", func(t *testing.T) {
+		rental, err := suite.repository.GetRental(suite.ctx, 1)
 
-	suite.NoError(err)
-	suite.NotNil(rental)
-	suite.Equal(1, rental.ID)
-	suite.Equal("2005-05-24 22:53:30 +0000 +0000", rental.RentalDate.String())
+		suite.NoError(err)
+		suite.NotNil(rental)
+		suite.Equal(1, rental.ID)
+		suite.Equal("2005-05-24 22:53:30 +0000 +0000", rental.RentalDate.String())
 
-	rental, err = suite.repository.GetRental(suite.ctx, 2)
-	suite.NoError(err)
-	suite.NotNil(rental)
-	suite.Equal(2, rental.ID)
-	suite.Equal("2005-05-24 22:54:33 +0000 +0000", rental.RentalDate.String())
+		rental, err = suite.repository.GetRental(suite.ctx, 2)
+		suite.NoError(err)
+		suite.NotNil(rental)
+		suite.Equal(2, rental.ID)
+		suite.Equal("2005-05-24 22:54:33 +0000 +0000", rental.RentalDate.String())
+	})
+
+	suite.T().Run("it should return nil if the rental does not exist", func(t *testing.T) {
+		rental, err := suite.repository.GetRental(suite.ctx, 1000000)
+		suite.True(errors.Is(err, sql.ErrNoRows))
+		suite.Nil(rental)
+	})
 }

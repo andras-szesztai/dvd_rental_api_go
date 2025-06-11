@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 type RoleStore struct {
@@ -25,6 +26,9 @@ func (s *RoleStore) GetRoleByName(ctx context.Context, name string) (*Role, erro
 		FROM roles
 		WHERE name = $1
 	`
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
 
 	row := s.db.QueryRowContext(ctx, query, name)
 

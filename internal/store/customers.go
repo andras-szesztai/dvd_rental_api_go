@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 type CustomerStore struct {
@@ -30,6 +31,9 @@ func (s *CustomerStore) GetCustomerByEmail(ctx context.Context, email string) (*
 		FROM customer
 		WHERE email = $1
 	`
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
 	row := s.db.QueryRowContext(ctx, query, email)
 

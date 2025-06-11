@@ -70,6 +70,9 @@ func (s *UserStore) GetUserByEmail(ctx context.Context, email string) (*User, er
 		WHERE email = $1
 	`
 
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
 	row := s.db.QueryRowContext(ctx, query, email)
 
 	var user User
@@ -87,6 +90,9 @@ func (s *UserStore) GetUserByID(ctx context.Context, id int64) (*User, error) {
 		FROM users
 		WHERE id = $1
 	`
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
 	row := s.db.QueryRowContext(ctx, query, id)
 

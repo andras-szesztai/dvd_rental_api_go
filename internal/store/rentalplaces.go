@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 type RentalPlaceStore struct {
@@ -23,6 +24,9 @@ func (s *RentalPlaceStore) GetRentalPlaceByID(ctx context.Context, id int64) (*R
 		FROM store
 		WHERE store_id = $1
 	`
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
 
 	row := s.db.QueryRowContext(ctx, query, id)
 
