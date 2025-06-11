@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -44,7 +43,7 @@ func TestCustomerRepository(t *testing.T) {
 	}
 
 	// Copy restore.sql to the temporary directory
-	restoreSQL, err := os.ReadFile(filepath.Join("..", "..", "testdata", "dvdrental", "restore.sql"))
+	restoreSQL, err := os.ReadFile(filepath.Join("..", "..", "testdata", "dvdrental", "new_restore.sql"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,6 +55,7 @@ func TestCustomerRepository(t *testing.T) {
 
 	pgContainer, err := postgres.Run(ctx,
 		"postgres:16.1-alpine",
+		postgres.WithDatabase("dvdrental"),
 		postgres.WithUsername("postgres"),
 		postgres.WithPassword("postgres"),
 		testcontainers.WithWaitStrategy(
@@ -68,7 +68,6 @@ func TestCustomerRepository(t *testing.T) {
 		}),
 	)
 
-	fmt.Println(tempDir, err)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,8 +81,6 @@ func TestCustomerRepository(t *testing.T) {
 	connStr, err := pgContainer.ConnectionString(ctx, "sslmode=disable")
 	assert.NoError(t, err)
 
-	fmt.Println(connStr)
-
 	db, err := sql.Open("postgres", connStr)
 	assert.NoError(t, err)
 
@@ -93,8 +90,11 @@ func TestCustomerRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, rental)
 	assert.Equal(t, 1, rental.ID)
+	assert.Equal(t, "2005-05-24 22:53:30 +0000 +0000", rental.RentalDate.String())
 
-	// rental, err = rentalStore.GetRental(ctx, 2)
-	// assert.NoError(t, err)
-	// assert.NotNil(t, rental)
+	rental, err = rentalStore.GetRental(ctx, 2)
+	assert.NoError(t, err)
+	assert.NotNil(t, rental)
+	assert.Equal(t, 2, rental.ID)
+	assert.Equal(t, "2005-05-24 22:54:33 +0000 +0000", rental.RentalDate.String())
 }

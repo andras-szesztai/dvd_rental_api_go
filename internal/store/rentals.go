@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 type RentalStore struct {
@@ -14,19 +15,20 @@ func NewRentalStore(db *sql.DB) *RentalStore {
 }
 
 type Rental struct {
-	ID int `json:"id"`
+	ID         int       `json:"id"`
+	RentalDate time.Time `json:"rental_date"`
 }
 
 func (s *RentalStore) GetRental(ctx context.Context, id int64) (*Rental, error) {
 	query := `
-		SELECT rental_id
+		SELECT rental_id,rental_date
 		FROM rental
 		WHERE rental_id = $1
 	`
 	row := s.db.QueryRowContext(ctx, query, id)
 
 	var rental Rental
-	err := row.Scan(&rental.ID)
+	err := row.Scan(&rental.ID, &rental.RentalDate)
 	if err != nil {
 		return nil, err
 	}
