@@ -24,10 +24,10 @@ type rentalResponse struct {
 //	@Produce		json
 //	@Param			id	path		string	true	"Rental ID"
 //	@Success		200	{object}	rentalResponse
-//	@Failure		400	{object}	errorResponse
-//	@Failure		401	{object}	errorResponse
-//	@Failure		404	{object}	errorResponse
-//	@Failure		500	{object}	errorResponse
+//	@Failure		400	{object}	utils.ErrorResponse
+//	@Failure		401	{object}	utils.ErrorResponse
+//	@Failure		404	{object}	utils.ErrorResponse
+//	@Failure		500	{object}	utils.ErrorResponse
 //	@Security		ApiKeyAuth
 //	@Router			/rentals/{id} [get]
 func (app *application) getRentalByID(w http.ResponseWriter, r *http.Request) {

@@ -28,6 +28,7 @@ func (suite *CustomersTestSuite) SetupSuite() {
 
 	suite.pgContainer = pgContainer
 	suite.repository = NewCustomerStore(suite.pgContainer.DB)
+
 }
 
 func TestCustomersTestSuite(t *testing.T) {
@@ -63,11 +64,29 @@ func (suite *CustomersTestSuite) TestGetCustomerByEmail() {
 	})
 }
 
-// func (suite *CustomersTestSuite) TestCreatCustomer() {
-// 	customer := &Customer{
-// 		StoreID:   1,
-// 		FirstName: "Lisa",
-// 		LastName:  "Anderson",
-// 		Email:     "lisa.anderson@sakilacustomer.org",
-// 	}
-// }
+func (suite *CustomersTestSuite) TestCreatCustomer() {
+	suite.T().Run("it should create a new customer", func(t *testing.T) {
+		customer := &Customer{
+			StoreID:   1,
+			FirstName: "John",
+			LastName:  "Doe",
+			Email:     "test@example.com",
+		}
+
+		// First check that the customer doesn't exist
+		existingCustomer, err := suite.repository.GetCustomerByEmail(suite.ctx, "test@example.com")
+		suite.True(errors.Is(err, sql.ErrNoRows))
+		suite.Nil(existingCustomer)
+
+		// Create the new customer
+		err = suite.repository.CreateCustomer(suite.ctx, customer)
+		suite.NoError(err)
+
+		// Verify the customer was created
+		createdCustomer, err := suite.repository.GetCustomerByEmail(suite.ctx, "test@example.com")
+		suite.NoError(err)
+		suite.NotNil(createdCustomer)
+		suite.Equal(createdCustomer.ID, 10000)
+		suite.Nil(createdCustomer.UserID)
+	})
+}

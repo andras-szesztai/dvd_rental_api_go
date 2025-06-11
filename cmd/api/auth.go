@@ -29,8 +29,8 @@ type registerUserPayload struct {
 //	@Produce		json
 //	@Param			request	body		registerUserPayload	true	"Register user request"
 //	@Success		201		{object}	nil
-//	@Failure		400		{object}	errorResponse
-//	@Failure		500		{object}	errorResponse
+//	@Failure		400		{object}	utils.ErrorResponse
+//	@Failure		500		{object}	utils.ErrorResponse
 //	@Router			/auth/register [post]
 func (app *application) registerUser(w http.ResponseWriter, r *http.Request) {
 	var payload registerUserPayload
@@ -121,8 +121,8 @@ type signInResponse struct {
 //	@Produce		json
 //	@Param			request	body		signInPayload	true	"Sign in user request"
 //	@Success		200		{object}	signInResponse	"JWT token"
-//	@Failure		400		{object}	errorResponse
-//	@Failure		500		{object}	errorResponse
+//	@Failure		400		{object}	utils.ErrorResponse
+//	@Failure		500		{object}	utils.ErrorResponse
 //	@Router			/auth/sign-in [post]
 func (app *application) signInUser(w http.ResponseWriter, r *http.Request) {
 	var payload signInPayload

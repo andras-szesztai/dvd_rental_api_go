@@ -23,8 +23,8 @@ type createCustomerPayload struct {
 //	@Produce		json
 //	@Param			request	body		createCustomerPayload	true	"Create customer request"
 //	@Success		201		{object}	nil
-//	@Failure		400		{object}	errorResponse
-//	@Failure		500		{object}	errorResponse
+//	@Failure		400		{object}	utils.ErrorResponse
+//	@Failure		500		{object}	utils.ErrorResponse
 //	@Security		ApiKeyAuth
 //	@Router			/customers [post]
 func (app *application) createCustomer(w http.ResponseWriter, r *http.Request) {

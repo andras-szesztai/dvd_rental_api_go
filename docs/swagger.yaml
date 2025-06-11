@@ -25,11 +25,6 @@ definitions:
     - last_name
     - store_id
     type: object
-  main.errorResponse:
-    properties:
-      error:
-        type: string
-    type: object
   main.healthCheckData:
     properties:
       environment:
@@ -92,6 +87,13 @@ definitions:
     properties:
       id:
         type: integer
+      rental_date:
+        type: string
+    type: object
+  utils.ErrorResponse:
+    properties:
+      error:
+        type: string
     type: object
 externalDocs:
   description: OpenAPI
@@ -130,11 +132,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       summary: Register user
       tags:
       - 2. Auth
@@ -160,11 +162,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       summary: Sign in user
       tags:
       - 2. Auth
@@ -188,11 +190,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Create customer
@@ -234,19 +236,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.errorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Get rental by ID

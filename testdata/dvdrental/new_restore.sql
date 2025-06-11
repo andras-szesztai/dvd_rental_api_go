@@ -9,9 +9,17 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 
+CREATE SEQUENCE public.customer_customer_id_seq
+    START WITH 10000
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE public.customer_customer_id_seq OWNER TO postgres;
 
 CREATE TABLE public.customer (
-    customer_id integer NOT NULL,
+    customer_id integer DEFAULT nextval('public.customer_customer_id_seq'::regclass) NOT NULL,
     store_id smallint NOT NULL,
     first_name character varying(45) NOT NULL,
     last_name character varying(45) NOT NULL,

@@ -1,0 +1,1 @@
+ALTER TABLE customer ALTER COLUMN address_id SET NOT NULL;
