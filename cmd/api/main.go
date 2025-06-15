@@ -129,7 +129,11 @@ func main() {
 	}
 
 	logger := zap.Must(zap.NewProduction()).Sugar()
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			log.Fatal("failed to sync logger", "error", err)
+		}
+	}()
 
 	db, err := db.NewDB(cfg.db.addr, cfg.db.maxOpenConns, cfg.db.maxIdleConns, cfg.db.maxIdleTime)
 	if err != nil {

@@ -55,5 +55,7 @@ func (app *application) getRentalByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSONResponse(w, http.StatusOK, rentalResponse{Data: *rental})
+	if err := utils.WriteJSONResponse(w, http.StatusOK, rentalResponse{Data: *rental}); err != nil {
+		app.errorHandler.InternalServerError(w, r, err)
+	}
 }

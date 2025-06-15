@@ -148,7 +148,6 @@ func (app *application) signInUser(w http.ResponseWriter, r *http.Request) {
 
 	if customer == nil {
 		staff, err := app.store.Staff.GetStaffByEmail(r.Context(), payload.Email)
-		fmt.Println("staff error", staff)
 		if err != nil {
 			app.errorHandler.BadRequest(w, r, err)
 			return
@@ -233,6 +232,7 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		// TODO Add cache
 		role, err := app.store.Roles.GetRoleByID(r.Context(), int64(user.Role.ID))
 		if err != nil {
 			app.errorHandler.Unauthorized(w, r, fmt.Errorf("invalid token"))

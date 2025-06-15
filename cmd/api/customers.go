@@ -55,5 +55,8 @@ func (app *application) createCustomer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSONResponse(w, http.StatusCreated, nil)
+	if err := utils.WriteJSONResponse(w, http.StatusCreated, nil); err != nil {
+		app.errorHandler.InternalServerError(w, r, err)
+		return
+	}
 }
