@@ -31,7 +31,7 @@ jobs:
       run: go vet ./...
 
     - name: Run lint
-      run: go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run --exclude-use-default=false --exclude-all=true --exclude=testhelpers
+      run: go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run --exclude=testhelpers
 
     - name: Run staticcheck
       run: go run honnef.co/go/tools/cmd/staticcheck@latest ./...
