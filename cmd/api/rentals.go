@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -34,8 +33,6 @@ type rentalResponse struct {
 func (app *application) getRentalByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	user := app.getUserContext(r)
-
-	fmt.Println("user.ID", user.ID)
 
 	if user == nil {
 		app.errorHandler.Unauthorized(w, r, errors.New("unauthorized"))
