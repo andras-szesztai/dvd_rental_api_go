@@ -62,12 +62,46 @@ func (m *MockRoleStore) GetRoleByName(ctx context.Context, name string) (*Role, 
 	if m.GetRoleByNameFunc != nil {
 		return m.GetRoleByNameFunc(ctx, name)
 	}
+	if name == "admin" {
+		return &Role{
+			ID:   1,
+			Name: "admin",
+		}, nil
+	} else if name == "customer" {
+		return &Role{
+			ID:   2,
+			Name: "customer",
+		}, nil
+	}
 	return nil, nil
 }
 
 func (m *MockRoleStore) GetRoleByID(ctx context.Context, id int64) (*Role, error) {
 	if m.GetRoleByIDFunc != nil {
 		return m.GetRoleByIDFunc(ctx, id)
+	}
+	if id == 1 {
+		return &Role{
+			ID:   1,
+			Name: "admin",
+		}, nil
+	}
+	if id == 2 {
+		return &Role{
+			ID:   2,
+			Name: "customer",
+		}, nil
+	}
+	return nil, nil
+}
+
+type MockRentalStore struct {
+	GetRentalFunc func(ctx context.Context, id int64) (*Rental, error)
+}
+
+func (m *MockRentalStore) GetRental(ctx context.Context, id int64) (*Rental, error) {
+	if m.GetRentalFunc != nil {
+		return m.GetRentalFunc(ctx, id)
 	}
 	return nil, nil
 }
@@ -78,5 +112,6 @@ func NewMockStore() *Store {
 		Staff:     &MockStaffStore{},
 		Customers: &MockCustomerStore{},
 		Roles:     &MockRoleStore{},
+		Rentals:   &MockRentalStore{},
 	}
 }

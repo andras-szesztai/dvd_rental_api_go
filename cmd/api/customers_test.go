@@ -31,12 +31,6 @@ func TestCreateCustomer(t *testing.T) {
 				},
 			}, nil
 		}
-		app.store.Roles.(*store.MockRoleStore).GetRoleByIDFunc = func(ctx context.Context, id int64) (*store.Role, error) {
-			return &store.Role{
-				ID:   1,
-				Name: "admin",
-			}, nil
-		}
 
 		req, err := http.NewRequest(http.MethodPost, "/v1/customers", bytes.NewBufferString(`{"store_id": 1, "first_name": "John", "last_name": "Doe"}`))
 		assert.NoError(t, err)
@@ -55,17 +49,11 @@ func TestCreateCustomer(t *testing.T) {
 			return &store.User{
 				ID: 1,
 				Role: &store.Role{
-					ID:   1,
-					Name: "customer",
+					ID: 2,
 				},
 			}, nil
 		}
-		app.store.Roles.(*store.MockRoleStore).GetRoleByIDFunc = func(ctx context.Context, id int64) (*store.Role, error) {
-			return &store.Role{
-				ID:   1,
-				Name: "customer",
-			}, nil
-		}
+		///
 
 		req, err := http.NewRequest(http.MethodPost, "/v1/customers", bytes.NewBufferString(`{"store_id": 1, "first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"}`))
 		assert.NoError(t, err)
@@ -84,15 +72,8 @@ func TestCreateCustomer(t *testing.T) {
 			return &store.User{
 				ID: 1,
 				Role: &store.Role{
-					ID:   2,
-					Name: "admin",
+					ID: 1,
 				},
-			}, nil
-		}
-		app.store.Roles.(*store.MockRoleStore).GetRoleByIDFunc = func(ctx context.Context, id int64) (*store.Role, error) {
-			return &store.Role{
-				ID:   2,
-				Name: "admin",
 			}, nil
 		}
 
@@ -113,15 +94,8 @@ func TestCreateCustomer(t *testing.T) {
 			return &store.User{
 				ID: 1,
 				Role: &store.Role{
-					ID:   2,
-					Name: "admin",
+					ID: 1,
 				},
-			}, nil
-		}
-		app.store.Roles.(*store.MockRoleStore).GetRoleByIDFunc = func(ctx context.Context, id int64) (*store.Role, error) {
-			return &store.Role{
-				ID:   2,
-				Name: "admin",
 			}, nil
 		}
 		app.store.Customers.(*store.MockCustomerStore).CreateCustomerFunc = func(ctx context.Context, customer *store.Customer) error {

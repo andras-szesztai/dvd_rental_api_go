@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -34,7 +35,9 @@ func (app *application) getRentalByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	user := app.getUserContext(r)
 
-	if user == nil || user.Role.Name != "admin" {
+	fmt.Println("user.ID", user.ID)
+
+	if user == nil {
 		app.errorHandler.Unauthorized(w, r, errors.New("unauthorized"))
 		return
 	}
@@ -52,6 +55,11 @@ func (app *application) getRentalByID(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		app.errorHandler.InternalServerError(w, r, err)
+		return
+	}
+
+	if user.Role.Name != "admin" {
+		app.errorHandler.Unauthorized(w, r, errors.New("unauthorized"))
 		return
 	}
 

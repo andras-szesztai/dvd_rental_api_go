@@ -232,8 +232,6 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		fmt.Println("user", user)
-
 		// TODO Add cache
 		role, err := app.store.Roles.GetRoleByID(r.Context(), int64(user.Role.ID))
 		if err != nil {
@@ -251,6 +249,7 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 func (app *application) CheckAdminMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := r.Context().Value(contextKey("user")).(*store.User)
+		fmt.Println("user.Role.Name", user.Role.Name)
 		if user.Role.Name != "admin" {
 			app.errorHandler.Unauthorized(w, r, fmt.Errorf("unauthorized"))
 			return

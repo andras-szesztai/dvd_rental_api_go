@@ -6,13 +6,13 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/andras-szesztai/dev-rental-api/internal/utils"
+	"github.com/andras-szesztai/dev-rental-api/internal/testhelpers"
 	"github.com/stretchr/testify/suite"
 )
 
 type StaffTestSuite struct {
 	suite.Suite
-	pgContainer *utils.PostgresContainer
+	pgContainer *testhelpers.PostgresContainer
 	repository  *StaffStore
 	ctx         context.Context
 }
@@ -20,7 +20,7 @@ type StaffTestSuite struct {
 func (suite *StaffTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
-	pgContainer, err := utils.CreatePostgresContainer()
+	pgContainer, err := testhelpers.CreatePostgresContainer()
 	if err != nil {
 		suite.T().Fatal(err)
 	}

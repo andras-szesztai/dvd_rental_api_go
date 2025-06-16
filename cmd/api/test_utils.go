@@ -11,7 +11,6 @@ import (
 
 func newTestApplication(t *testing.T) *application {
 	t.Helper()
-
 	return &application{
 		logger:        zap.NewNop().Sugar(),
 		store:         store.NewMockStore(),
