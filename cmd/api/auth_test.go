@@ -218,7 +218,8 @@ func TestSignInUser(t *testing.T) {
 	mux := app.mountRoutes()
 	plaintextPassword := "password"
 	hashedPassword := utils.Password{Plaintext: &plaintextPassword}
-	hashedPassword.Set(plaintextPassword)
+	err := hashedPassword.Set(plaintextPassword)
+	assert.NoError(t, err)
 
 	t.Run("it should return bad request if payload is invalid", func(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, "/v1/auth/sign-in", bytes.NewBufferString(`{"email": "dasdas", "password":"`+plaintextPassword+`"}`))
@@ -333,7 +334,8 @@ func TestSignInUser(t *testing.T) {
 	t.Run("bad request if password is incorrect", func(t *testing.T) {
 		wrongPassword := "wrong"
 		hashedPassword := utils.Password{Plaintext: &wrongPassword}
-		hashedPassword.Set(wrongPassword)
+		err := hashedPassword.Set(wrongPassword)
+		assert.NoError(t, err)
 		app.store.Customers.(*store.MockCustomerStore).GetCustomerByEmailFunc = func(ctx context.Context, email string) (*store.Customer, error) {
 			return nil, sql.ErrNoRows
 		}

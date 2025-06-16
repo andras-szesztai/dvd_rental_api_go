@@ -232,6 +232,8 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		fmt.Println("user", user)
+
 		// TODO Add cache
 		role, err := app.store.Roles.GetRoleByID(r.Context(), int64(user.Role.ID))
 		if err != nil {
