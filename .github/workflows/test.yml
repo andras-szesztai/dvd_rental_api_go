@@ -1,14 +1,13 @@
 name: Build and Test
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "dev", "prod" ]
 
 jobs:
-
   build_and_test:
+    if: >
+      !startsWith(github.head_ref, 'chore(prod): release')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
