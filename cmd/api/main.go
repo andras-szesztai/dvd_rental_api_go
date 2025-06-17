@@ -105,7 +105,7 @@ type tokenConfig struct {
 // @externalDocs.description	OpenAPI
 // @externalDocs.url			https://swagger.io/resources/open-api/
 func main() {
-	if os.Getenv("ENV") != "prod" {
+	if os.Getenv("ENV") != "production" {
 		err := godotenv.Load()
 		if err != nil {
 			log.Fatal("Error loading .env file")
