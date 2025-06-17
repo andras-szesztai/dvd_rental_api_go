@@ -16,5 +16,23 @@ services:
     restart: unless-stopped
     command: postgres -c 'max_connections=1000'
 
+  api:
+    build: .
+    container_name: dvd_rental_api
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_ADDR=postgresql://postgres:postgres@postgres:5432/dvd_rental?sslmode=disable
+      - PORT=:8080
+      - ENV=development
+      - TOKEN_SECRET=dev-secret-key
+      - TOKEN_EXP=24h
+      - TOKEN_AUD=dev-audience
+      - TOKEN_ISS=dev-issuer
+      - API_URL=http://localhost:8080
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
 volumes:
   postgres_data:
