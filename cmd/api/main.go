@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -114,11 +115,11 @@ func main() {
 
 	exp, err := time.ParseDuration(os.Getenv("TOKEN_EXP"))
 	if err != nil {
-		log.Fatal("Error parsing TOKEN_EXP")
+		fmt.Println("Error parsing TOKEN_EXP", err)
 	}
 
 	cfg := config{
-		addr:    os.Getenv("PORT"),
+		addr:    os.Getenv("PORT_ADDR"),
 		env:     os.Getenv("ENV"),
 		version: getVersion(),
 		db: dbConfig{
