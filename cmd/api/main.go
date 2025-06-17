@@ -118,7 +118,7 @@ func main() {
 	}
 
 	cfg := config{
-		addr:    os.Getenv("PORT"),
+		addr:    os.Getenv("PORT_ADDR"),
 		env:     os.Getenv("ENV"),
 		version: getVersion(),
 		db: dbConfig{
