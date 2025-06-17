@@ -66,7 +66,7 @@ func (app *application) mountRoutes() http.Handler {
 }
 
 func (app *application) serve(router http.Handler) error {
-	docs.SwaggerInfo.Version = version
+	docs.SwaggerInfo.Version = app.config.version
 	docs.SwaggerInfo.Host = app.config.apiURL
 	docs.SwaggerInfo.BasePath = "/v1"
 	docs.SwaggerInfo.Title = "DVD Rental API"
@@ -80,7 +80,7 @@ func (app *application) serve(router http.Handler) error {
 		IdleTimeout:  time.Minute,
 	}
 
-	app.logger.Infow("starting server", "addr", srv.Addr, "env", app.config.env, "version", version)
+	app.logger.Infow("starting server", "addr", srv.Addr, "env", app.config.env, "version", app.config.version)
 
 	return srv.ListenAndServe()
 }

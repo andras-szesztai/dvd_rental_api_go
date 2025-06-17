@@ -15,7 +15,13 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const version = "0.0.1"
+func getVersion() string {
+	version, err := os.ReadFile("version.txt")
+	if err != nil {
+		return "unknown"
+	}
+	return string(version)
+}
 
 //	@title			DVD Rental API
 //	@version		0.0.1
@@ -48,11 +54,12 @@ type application struct {
 }
 
 type config struct {
-	addr   string
-	env    string
-	db     dbConfig
-	auth   authConfig
-	apiURL string
+	addr    string
+	env     string
+	db      dbConfig
+	auth    authConfig
+	apiURL  string
+	version string
 }
 
 type dbConfig struct {
@@ -109,8 +116,9 @@ func main() {
 	}
 
 	cfg := config{
-		addr: os.Getenv("PORT"),
-		env:  os.Getenv("ENV"),
+		addr:    os.Getenv("PORT"),
+		env:     os.Getenv("ENV"),
+		version: getVersion(),
 		db: dbConfig{
 			addr:         os.Getenv("DB_ADDR"),
 			maxOpenConns: 50,
