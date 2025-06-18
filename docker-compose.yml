@@ -16,6 +16,20 @@ services:
     restart: unless-stopped
     command: postgres -c 'max_connections=1000'
 
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    container_name: dvd_rental_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass secret --save 60 1 --loglevel warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
   api:
     build: .
     container_name: dvd_rental_api
@@ -30,8 +44,14 @@ services:
       - TOKEN_AUD=dev-audience
       - TOKEN_ISS=dev-issuer
       - API_URL=http://localhost:8080
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASSWORD=secret
+      - REDIS_DB=0
     depends_on:
-      - postgres
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

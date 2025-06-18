@@ -3,12 +3,14 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	_ "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 
 	"github.com/andras-szesztai/dev-rental-api/internal/auth"
+	"github.com/andras-szesztai/dev-rental-api/internal/cache"
 	"github.com/andras-szesztai/dev-rental-api/internal/db"
 	"github.com/andras-szesztai/dev-rental-api/internal/store"
 	"github.com/andras-szesztai/dev-rental-api/internal/utils"
@@ -51,6 +53,7 @@ type application struct {
 	store         *store.Store
 	authenticator auth.Authenticator
 	errorHandler  *utils.ErrorHandler
+	cache         *cache.Storage
 }
 
 type config struct {
@@ -60,6 +63,7 @@ type config struct {
 	auth    authConfig
 	apiURL  string
 	version string
+	redis   redisConfig
 }
 
 type dbConfig struct {
@@ -78,6 +82,12 @@ type tokenConfig struct {
 	exp    time.Duration
 	aud    string
 	iss    string
+}
+
+type redisConfig struct {
+	addr     string
+	password string
+	db       int
 }
 
 //	@title			Swagger Examasdasdasdasdasdawdasple API
@@ -117,6 +127,11 @@ func main() {
 		log.Fatal("Error parsing TOKEN_EXP")
 	}
 
+	redisDB, err := strconv.Atoi(os.Getenv("REDIS_DB"))
+	if err != nil {
+		log.Fatal("Error parsing REDIS_DB")
+	}
+
 	cfg := config{
 		addr:    os.Getenv("PORT_ADDR"),
 		env:     os.Getenv("ENV"),
@@ -134,6 +149,11 @@ func main() {
 				aud:    os.Getenv("TOKEN_AUD"),
 				iss:    os.Getenv("TOKEN_ISS"),
 			},
+		},
+		redis: redisConfig{
+			addr:     os.Getenv("REDIS_ADDR"),
+			password: os.Getenv("REDIS_PASSWORD"),
+			db:       redisDB,
 		},
 		apiURL: os.Getenv("API_URL"),
 	}
@@ -158,12 +178,20 @@ func main() {
 
 	errorHandler := utils.NewErrorHandler(logger)
 
+	redisCache, err := cache.NewRedisCache(cfg.redis.addr, cfg.redis.db, cfg.redis.password)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	defer redisCache.Client.Close()
+	logger.Info("redis connection pool established")
+
 	app := &application{
 		logger:        logger,
 		config:        cfg,
 		store:         store,
 		authenticator: authenticator,
 		errorHandler:  errorHandler,
+		cache:         cache.NewRedisStorage(redisCache),
 	}
 
 	err = app.serve(app.mountRoutes())

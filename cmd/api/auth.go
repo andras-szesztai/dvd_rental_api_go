@@ -12,6 +12,7 @@ import (
 	"github.com/andras-szesztai/dev-rental-api/internal/store"
 	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 type registerUserPayload struct {
@@ -226,13 +227,12 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		user, err := app.store.Users.GetUserByID(r.Context(), userId)
+		user, err := app.getUser(r, userId)
 		if err != nil {
-			app.errorHandler.Unauthorized(w, r, fmt.Errorf("invalid token"))
+			app.errorHandler.InternalServerError(w, r, err)
 			return
 		}
 
-		// TODO Add cache
 		role, err := app.store.Roles.GetRoleByID(r.Context(), int64(user.Role.ID))
 		if err != nil {
 			app.errorHandler.Unauthorized(w, r, fmt.Errorf("invalid token"))
@@ -244,6 +244,29 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), contextKey("user"), user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func (app *application) getUser(r *http.Request, userId int64) (*store.User, error) {
+	user, err := app.cache.Users.Get(r.Context(), userId)
+	if err != nil && err != redis.Nil {
+		return nil, err
+	}
+
+	if user != nil {
+		app.logger.Infow("user found in cache", "user", user.ID)
+	} else {
+		user, err = app.store.Users.GetUserByID(r.Context(), userId)
+		if err != nil {
+			return nil, err
+		}
+		app.logger.Infow("user not found in cache, read from database", "user", user.ID)
+		err = app.cache.Users.Set(r.Context(), user)
+		if err != nil {
+			app.logger.Infow("error setting user in cache", "error", err)
+		}
+	}
+
+	return user, nil
 }
 
 func (app *application) CheckAdminMiddleware(next http.HandlerFunc) http.HandlerFunc {

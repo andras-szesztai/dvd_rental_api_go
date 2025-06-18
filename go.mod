@@ -16,12 +16,14 @@ require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/docker v28.2.2+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
@@ -84,6 +86,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lib/pq v1.10.9
+	github.com/redis/go-redis/v9 v9.10.0
 	github.com/swaggo/http-swagger/v2 v2.0.2
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.27.0
