@@ -229,12 +229,20 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 
 		user, err := app.getUser(r, userId)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				app.errorHandler.BadRequest(w, r, fmt.Errorf("user not found"))
+				return
+			}
 			app.errorHandler.InternalServerError(w, r, err)
 			return
 		}
 
+		fmt.Println("user", user.Role.ID)
+
 		role, err := app.store.Roles.GetRoleByID(r.Context(), int64(user.Role.ID))
+		fmt.Println("role", role.ID)
 		if err != nil {
+			fmt.Println("role error", err)
 			app.errorHandler.Unauthorized(w, r, fmt.Errorf("invalid token"))
 			return
 		}

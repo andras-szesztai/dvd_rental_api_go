@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/andras-szesztai/dev-rental-api/internal/cache"
 	"github.com/andras-szesztai/dev-rental-api/internal/store"
 	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
@@ -445,8 +446,8 @@ func TestAuthTokenMiddleware(t *testing.T) {
 		recorder := httptest.NewRecorder()
 		mux.ServeHTTP(recorder, req)
 
-		assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-		assert.Contains(t, recorder.Body.String(), "unauthorized")
+		assert.Equal(t, http.StatusBadRequest, recorder.Code)
+		assert.Contains(t, recorder.Body.String(), "user not found")
 	})
 
 	t.Run("unauthorized if user has invalid role", func(t *testing.T) {
@@ -460,7 +461,7 @@ func TestAuthTokenMiddleware(t *testing.T) {
 			}, nil
 		}
 		app.store.Roles.(*store.MockRoleStore).GetRoleByIDFunc = func(ctx context.Context, id int64) (*store.Role, error) {
-			return nil, sql.ErrNoRows
+			return &store.Role{}, sql.ErrNoRows
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/rentals/1", nil)
@@ -473,5 +474,40 @@ func TestAuthTokenMiddleware(t *testing.T) {
 
 		assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 		assert.Contains(t, recorder.Body.String(), "unauthorized")
+	})
+
+	t.Run("it reads user from cache if it exists", func(t *testing.T) {
+		app.store.Users.(*store.MockUserStore).GetUserByIDFunc = func(ctx context.Context, id int64) (*store.User, error) {
+			return &store.User{}, nil
+		}
+		app.cache.Users.(*cache.MockUserCache).GetFunc = func(ctx context.Context, id int64) (*store.User, error) {
+			return &store.User{
+				ID: 1,
+				Role: &store.Role{
+					ID: 1,
+				},
+			}, nil
+		}
+		app.store.Roles.(*store.MockRoleStore).GetRoleByIDFunc = func(ctx context.Context, id int64) (*store.Role, error) {
+			return &store.Role{
+				ID:   1,
+				Name: "admin",
+			}, nil
+		}
+		app.store.Rentals.(*store.MockRentalStore).GetRentalFunc = func(ctx context.Context, id int64) (*store.Rental, error) {
+			return &store.Rental{
+				ID: 1,
+			}, nil
+		}
+
+		req, err := http.NewRequest(http.MethodGet, "/v1/rentals/1", nil)
+		assert.NoError(t, err)
+
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
+		recorder := httptest.NewRecorder()
+		mux.ServeHTTP(recorder, req)
+
+		assert.Equal(t, http.StatusOK, recorder.Code)
 	})
 }
