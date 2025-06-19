@@ -160,7 +160,6 @@ func (app *application) signInUser(w http.ResponseWriter, r *http.Request) {
 		userID = *customer.UserID
 	}
 
-	fmt.Println("customer error", userID)
 	user, err := app.store.Users.GetUserByID(r.Context(), int64(userID))
 	if err != nil {
 		app.errorHandler.BadRequest(w, r, err)
@@ -237,12 +236,8 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		fmt.Println("user", user.Role.ID)
-
 		role, err := app.store.Roles.GetRoleByID(r.Context(), int64(user.Role.ID))
-		fmt.Println("role", role.ID)
 		if err != nil {
-			fmt.Println("role error", err)
 			app.errorHandler.Unauthorized(w, r, fmt.Errorf("invalid token"))
 			return
 		}
@@ -280,7 +275,6 @@ func (app *application) getUser(r *http.Request, userId int64) (*store.User, err
 func (app *application) CheckAdminMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := r.Context().Value(contextKey("user")).(*store.User)
-		fmt.Println("user.Role.Name", user.Role.Name)
 		if user.Role.Name != "admin" {
 			app.errorHandler.Unauthorized(w, r, fmt.Errorf("unauthorized"))
 			return
