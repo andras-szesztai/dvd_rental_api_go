@@ -12,6 +12,7 @@ import (
 	"github.com/andras-szesztai/dev-rental-api/internal/auth"
 	"github.com/andras-szesztai/dev-rental-api/internal/cache"
 	"github.com/andras-szesztai/dev-rental-api/internal/db"
+	"github.com/andras-szesztai/dev-rental-api/internal/ratelimiter"
 	"github.com/andras-szesztai/dev-rental-api/internal/store"
 	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 	"github.com/joho/godotenv"
@@ -54,16 +55,18 @@ type application struct {
 	authenticator auth.Authenticator
 	errorHandler  *utils.ErrorHandler
 	cache         *cache.Storage
+	rateLimiter   *ratelimiter.FixedWindowLimiter
 }
 
 type config struct {
-	addr    string
-	env     string
-	db      dbConfig
-	auth    authConfig
-	apiURL  string
-	version string
-	redis   redisConfig
+	addr        string
+	env         string
+	db          dbConfig
+	auth        authConfig
+	apiURL      string
+	version     string
+	redis       redisConfig
+	rateLimiter ratelimiter.Config
 }
 
 type dbConfig struct {
@@ -155,6 +158,10 @@ func main() {
 			password: os.Getenv("REDIS_PASSWORD"),
 			db:       redisDB,
 		},
+		rateLimiter: ratelimiter.Config{
+			RequestPerTimeFrame: utils.GetInt("RATE_LIMITER_REQUEST_PER_TIME_FRAME", 100),
+			TimeFrame:           utils.GetDuration("RATE_LIMITER_TIME_FRAME", time.Minute),
+		},
 		apiURL: os.Getenv("API_URL"),
 	}
 
@@ -185,6 +192,11 @@ func main() {
 	defer redisCache.Client.Close()
 	logger.Info("redis connection pool established")
 
+	rateLimiter := ratelimiter.NewFixedWindowLimiter(
+		cfg.rateLimiter.RequestPerTimeFrame,
+		cfg.rateLimiter.TimeFrame,
+	)
+
 	app := &application{
 		logger:        logger,
 		config:        cfg,
@@ -192,6 +204,7 @@ func main() {
 		authenticator: authenticator,
 		errorHandler:  errorHandler,
 		cache:         cache.NewRedisStorage(redisCache),
+		rateLimiter:   rateLimiter,
 	}
 
 	err = app.serve(app.mountRoutes())

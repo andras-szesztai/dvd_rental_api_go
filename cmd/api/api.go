@@ -28,9 +28,11 @@ func (app *application) mountRoutes() http.Handler {
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.StripSlashes)
+	router.Use(app.RateLimiterMiddleware)
 
 	router.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
+		r.Get("/test", app.testRateLimiter)
 
 		docsURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(
@@ -83,4 +85,10 @@ func (app *application) serve(router http.Handler) error {
 	app.logger.Infow("starting server", "addr", srv.Addr, "env", app.config.env, "version", app.config.version)
 
 	return srv.ListenAndServe()
+}
+
+func (app *application) testRateLimiter(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"message": "Rate limiter test endpoint", "timestamp": "` + time.Now().Format(time.RFC3339) + `"}`))
 }

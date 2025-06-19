@@ -45,3 +45,11 @@ func (e *ErrorHandler) Unauthorized(w http.ResponseWriter, r *http.Request, err 
 		e.logger.Errorw("failed to write JSON error", "error", err.Error())
 	}
 }
+
+func (e *ErrorHandler) TooManyRequests(w http.ResponseWriter, r *http.Request, err error) {
+	e.logger.Warnw("too many requests", "method", r.Method, "url", r.URL.Path, "error", err.Error())
+	err = WriteJSONError(w, http.StatusTooManyRequests, "too many requests")
+	if err != nil {
+		e.logger.Errorw("failed to write JSON error", "error", err.Error())
+	}
+}
