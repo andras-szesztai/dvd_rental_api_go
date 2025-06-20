@@ -44,7 +44,30 @@ func (app *application) getMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := utils.WriteJSONResponse(w, http.StatusOK, movies); err != nil {
+	for _, movie := range movies {
+		inventories, err := app.store.Inventory.GetMovieInventory(r.Context(), movie.ID)
+		if err != nil {
+			app.errorHandler.InternalServerError(w, r, err)
+			return
+		}
+		for _, inventory := range inventories {
+			inventoryID := int64(inventory.ID)
+			rentals, err := app.store.Rentals.GetMovieRentals(r.Context(), inventoryID)
+			if err != nil {
+				app.errorHandler.InternalServerError(w, r, err)
+				return
+			}
+			rentedFromInventory := 0
+			for _, rental := range rentals {
+				if !rental.ReturnDate.Valid {
+					rentedFromInventory++
+				}
+			}
+			movie.AvailableToRent = len(inventories) - rentedFromInventory
+		}
+	}
+
+	if err := utils.WriteJSONResponse(w, http.StatusOK, moviesResponse{Data: movies}); err != nil {
 		app.errorHandler.InternalServerError(w, r, err)
 		return
 	}

@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+
+	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 )
 
 type MockUserStore struct {
@@ -96,12 +98,42 @@ func (m *MockRoleStore) GetRoleByID(ctx context.Context, id int64) (*Role, error
 }
 
 type MockRentalStore struct {
-	GetRentalFunc func(ctx context.Context, id int64) (*Rental, error)
+	GetRentalFunc       func(ctx context.Context, id int64) (*Rental, error)
+	GetMovieRentalsFunc func(ctx context.Context, inventoryID int64) ([]*Rental, error)
 }
 
 func (m *MockRentalStore) GetRental(ctx context.Context, id int64) (*Rental, error) {
 	if m.GetRentalFunc != nil {
 		return m.GetRentalFunc(ctx, id)
+	}
+	return nil, nil
+}
+
+func (m *MockRentalStore) GetMovieRentals(ctx context.Context, inventoryID int64) ([]*Rental, error) {
+	if m.GetMovieRentalsFunc != nil {
+		return m.GetMovieRentalsFunc(ctx, inventoryID)
+	}
+	return nil, nil
+}
+
+type MockMovieStore struct {
+	GetMoviesFunc func(ctx context.Context, movieQuery *utils.MovieQuery) ([]*Movie, error)
+}
+
+func (m *MockMovieStore) GetMovies(ctx context.Context, movieQuery *utils.MovieQuery) ([]*Movie, error) {
+	if m.GetMoviesFunc != nil {
+		return m.GetMoviesFunc(ctx, movieQuery)
+	}
+	return nil, nil
+}
+
+type MockInventoryStore struct {
+	GetMovieInventoryFunc func(ctx context.Context, filmID int) ([]*Inventory, error)
+}
+
+func (m *MockInventoryStore) GetMovieInventory(ctx context.Context, filmID int) ([]*Inventory, error) {
+	if m.GetMovieInventoryFunc != nil {
+		return m.GetMovieInventoryFunc(ctx, filmID)
 	}
 	return nil, nil
 }
@@ -113,5 +145,7 @@ func NewMockStore() *Store {
 		Customers: &MockCustomerStore{},
 		Roles:     &MockRoleStore{},
 		Rentals:   &MockRentalStore{},
+		Movies:    &MockMovieStore{},
+		Inventory: &MockInventoryStore{},
 	}
 }

@@ -449,6 +449,9 @@ const docTemplate = `{
         "store.Movie": {
             "type": "object",
             "properties": {
+                "available_to_rent": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -469,7 +472,13 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "inventory_id": {
+                    "type": "integer"
+                },
                 "rental_date": {
+                    "type": "string"
+                },
+                "return_date": {
                     "type": "string"
                 }
             }

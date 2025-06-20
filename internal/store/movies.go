@@ -17,10 +17,11 @@ func NewMovieStore(db *sql.DB) *MovieStore {
 }
 
 type Movie struct {
-	ID          int    `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	ReleaseYear int    `json:"release_year"`
+	ID              int    `json:"id"`
+	Title           string `json:"title"`
+	Description     string `json:"description"`
+	ReleaseYear     int    `json:"release_year"`
+	AvailableToRent int    `json:"available_to_rent"`
 }
 
 func (s *MovieStore) GetMovies(ctx context.Context, movieQuery *utils.MovieQuery) ([]*Movie, error) {

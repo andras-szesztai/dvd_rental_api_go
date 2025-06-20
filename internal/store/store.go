@@ -33,8 +33,12 @@ type Store struct {
 	Movies interface {
 		GetMovies(ctx context.Context, movieQuery *utils.MovieQuery) ([]*Movie, error)
 	}
+	Inventory interface {
+		GetMovieInventory(ctx context.Context, filmID int) ([]*Inventory, error)
+	}
 	Rentals interface {
 		GetRental(ctx context.Context, id int64) (*Rental, error)
+		GetMovieRentals(ctx context.Context, inventoryID int64) ([]*Rental, error)
 	}
 	RentalPlaces interface {
 		GetRentalPlaceByID(ctx context.Context, id int64) (*RentalPlace, error)
@@ -50,6 +54,7 @@ func NewStore(db *sql.DB) *Store {
 		Customers:    NewCustomerStore(db),
 		Roles:        NewRoleStore(db),
 		Movies:       NewMovieStore(db),
+		Inventory:    NewInventoryStore(db),
 	}
 }
 

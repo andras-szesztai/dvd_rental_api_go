@@ -92,6 +92,8 @@ definitions:
     type: object
   store.Movie:
     properties:
+      available_to_rent:
+        type: integer
       description:
         type: string
       id:
@@ -105,7 +107,11 @@ definitions:
     properties:
       id:
         type: integer
+      inventory_id:
+        type: integer
       rental_date:
+        type: string
+      return_date:
         type: string
     type: object
   utils.ErrorResponse:
