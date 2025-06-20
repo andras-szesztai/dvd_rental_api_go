@@ -3,8 +3,13 @@ package main
 import (
 	"net/http"
 
+	"github.com/andras-szesztai/dev-rental-api/internal/store"
 	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 )
+
+type moviesResponse struct {
+	Data []*store.Movie `json:"data"`
+}
 
 // GetMovies godoc
 //
@@ -14,7 +19,7 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Param			query	query		utils.MovieQuery	true	"Query parameters"
-//	@Success		200		{object}	any
+//	@Success		200		{object}	moviesResponse
 //	@Failure		400		{object}	utils.ErrorResponse
 //	@Failure		500		{object}	utils.ErrorResponse
 //	@Security		ApiKeyAuth
@@ -33,7 +38,13 @@ func (app *application) getMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := utils.WriteJSONResponse(w, http.StatusOK, nil); err != nil {
+	movies, err := app.store.Movies.GetMovies(r.Context(), &movieQuery)
+	if err != nil {
+		app.errorHandler.InternalServerError(w, r, err)
+		return
+	}
+
+	if err := utils.WriteJSONResponse(w, http.StatusOK, movies); err != nil {
 		app.errorHandler.InternalServerError(w, r, err)
 		return
 	}

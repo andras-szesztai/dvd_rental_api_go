@@ -61,9 +61,10 @@ func (app *application) mountRoutes() http.Handler {
 			r.Route("/customers", func(r chi.Router) {
 				r.Post("/", app.CheckAdminMiddleware(app.createCustomer))
 			})
-			r.Route("/movies", func(r chi.Router) {
-				r.Get("/", app.getMovies)
-			})
+		})
+
+		r.Route("/movies", func(r chi.Router) {
+			r.Get("/", app.getMovies)
 		})
 	})
 

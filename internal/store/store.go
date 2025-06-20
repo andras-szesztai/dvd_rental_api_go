@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
+	"github.com/andras-szesztai/dev-rental-api/internal/utils"
 )
 
 var (
@@ -28,6 +30,9 @@ type Store struct {
 		GetRoleByName(ctx context.Context, name string) (*Role, error)
 		GetRoleByID(ctx context.Context, id int64) (*Role, error)
 	}
+	Movies interface {
+		GetMovies(ctx context.Context, movieQuery *utils.MovieQuery) ([]*Movie, error)
+	}
 	Rentals interface {
 		GetRental(ctx context.Context, id int64) (*Rental, error)
 	}
@@ -44,6 +49,7 @@ func NewStore(db *sql.DB) *Store {
 		Staff:        NewStaffStore(db),
 		Customers:    NewCustomerStore(db),
 		Roles:        NewRoleStore(db),
+		Movies:       NewMovieStore(db),
 	}
 }
 

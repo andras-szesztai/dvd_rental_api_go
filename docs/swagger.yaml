@@ -39,6 +39,13 @@ definitions:
       data:
         $ref: '#/definitions/main.healthCheckData'
     type: object
+  main.moviesResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/store.Movie'
+        type: array
+    type: object
   main.registerUserPayload:
     properties:
       email:
@@ -81,6 +88,17 @@ definitions:
   main.signInResponse:
     properties:
       data:
+        type: string
+    type: object
+  store.Movie:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      release_year:
+        type: integer
+      title:
         type: string
     type: object
   store.Rental:
@@ -248,7 +266,8 @@ paths:
       responses:
         "200":
           description: OK
-          schema: {}
+          schema:
+            $ref: '#/definitions/main.moviesResponse'
         "400":
           description: Bad Request
           schema:

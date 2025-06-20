@@ -238,7 +238,9 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.moviesResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -372,6 +374,17 @@ const docTemplate = `{
                 }
             }
         },
+        "main.moviesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/store.Movie"
+                    }
+                }
+            }
+        },
         "main.registerUserPayload": {
             "type": "object",
             "required": [
@@ -429,6 +442,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
+                    "type": "string"
+                }
+            }
+        },
+        "store.Movie": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "release_year": {
+                    "type": "integer"
+                },
+                "title": {
                     "type": "string"
                 }
             }
